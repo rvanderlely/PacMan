@@ -72,6 +72,7 @@ async function chew()
           console.log('right arrow pressed')
         }
       }
+      //test
 
 
     //wait for ms and then clear the screen and draw open mouth pacman
