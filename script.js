@@ -32,8 +32,6 @@ function drawPacman(){
  }
 
 
- 
-
 
 //Sleep for ms to control chew speed
 function sleepChew(ms) {
@@ -43,38 +41,44 @@ function sleepChew(ms) {
 //to make pacman "chew" using request animation frame. 
 //Request animation frame takes in a call back which is the chew function
 //Being called over and over again and repainting the canvas
-async function chew()
-{
 
     //Detect key down
     document.onkeydown = (e) => {
-        e = e || window.event;
-        if (e.key === 'ArrowUp') 
-        {
-          console.log('up arrow pressed')
-        } 
-        else if (e.key === 'ArrowDown') 
-        {
-          console.log('down arrow pressed')
-        } 
-        else if (e.key === 'ArrowLeft') 
-        {
+      e = e || window.event;
+      if (e.key === 'ArrowUp') 
+      {
+        console.log('up arrow pressed')
+      } 
+      else if (e.key === 'ArrowDown') 
+      {
+        console.log('down arrow pressed')
+      } 
+      else if (e.key === 'ArrowLeft') 
+      {
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        pacman.x -= pacman.dx;
+        pacman.mouth1x -= pacman.dx;
+        console.log('left arrow pressed')
+      } 
+      else if (e.key === 'ArrowRight') 
+      {
           ctx.clearRect(0,0,canvas.width,canvas.height)
-          pacman.x -= pacman.dx;
-          pacman.mouth1x -= pacman.dx;
-          console.log('left arrow pressed')
-        } 
-        else if (e.key === 'ArrowRight') 
-        {
-            ctx.clearRect(0,0,canvas.width,canvas.height)
-            pacman.x += pacman.dx;
-            pacman.mouth1x += pacman.dx;
-          console.log('right arrow pressed')
-        }
+          pacman.x += pacman.dx;
+          pacman.mouth1x += pacman.dx;
+        console.log('right arrow pressed')
       }
-      //test
+    }
 
 
+
+
+
+
+
+
+
+async function chew()
+{
     //wait for ms and then clear the screen and draw open mouth pacman
     await sleepChew(100);
     ctx.clearRect(0,0,canvas.width,canvas.height);
