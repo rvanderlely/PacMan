@@ -3,8 +3,8 @@
 const canvas = document.getElementById('canvas'); //Create a canvas and give it a 2D context 
 const ctx = canvas.getContext('2d');
 const scoreE = document.getElementById('scoreE'); //Create a canvas and give it a 2D context 
-canvas.width = innerWidth
-canvas.height = innerHeight
+canvas.width = 445
+canvas.height = 525
 
 
 
