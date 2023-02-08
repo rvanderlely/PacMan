@@ -18,7 +18,7 @@
   <a href="#license">License</a>
 </p>
 
-![screenshot](https://raw.githubusercontent.com/amitmerchant1990/electron-markdownify/master/app/img/markdownify.gif)
+![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/Pacman.gif)
 
 ## Key Features
 
