@@ -18,7 +18,7 @@
   <a href="#license">License</a>
 </p>
 
-![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/Pacman.gif)
+![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif)
 
 ## Key Features
 
