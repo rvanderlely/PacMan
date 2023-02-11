@@ -10,15 +10,16 @@
 </head>
 <body>
     <h1>PacWoman</h1>
-    <div id =scoreboard></div>
-    <p>
-        <span style ='display: none'>Score: </span><span style ='display: none' id="scoreE">0</span>
+    <div ></div>
+    <p id ="scoreboard" style ='display: none'>
+        <span >Score: </span><span id="scoreE">0</span>
     </p>
     <div id = 'start-screen' class = 'screen' style ='display: block' >
         <button onclick='startGame()'>Start Game </button>
     </div>
     <div style = "text-align:center;"> 
          <canvas id="canvas" style = 'display: none;'> </canvas>  
+         <p id ='gameOver' style = 'display: none;'>Game Over</p>
     </div>
     <script src="pacman.js"></script>
     <script src="map.js"></script>

@@ -1,15 +1,44 @@
-
-//Canvas Information
+/*-----------------------------------------------------
+              Canvas Setup
+------------------------------------------------------*/
 const canvas = document.getElementById('canvas'); //Create a canvas and give it a 2D context 
 const ctx = canvas.getContext('2d');
 const scoreE = document.getElementById('scoreE'); //Create a canvas and give it a 2D context 
 canvas.width = 445
 canvas.height = 525
 
+/*-----------------------------------------------------
+              startGame Function
+------------------------------------------------------*/
+function startGame()
+{
+toggleScreen('canvas',true)
+toggleScreen('scoreboard',true)
+toggleScreen('start-screen',false)
 
-/*
-Pacman Class
-*/
+}
+/*-----------------------------------------------------
+              endGame Function
+------------------------------------------------------*/
+function endGame()
+{
+  toggleScreen('gameOver',true)
+}
+
+/*-----------------------------------------------------
+              toggleScreen Function
+------------------------------------------------------*/
+function toggleScreen(id,toggle)
+{
+let element = document.getElementById(id);
+let display = (toggle) ? 'block' : 'none'
+element.style.display = display;
+}
+
+/*******************************************************
+                      Pacman Class
+
+********************************************************/
 class Pacman                                     
 {
     constructor({position,velocity}) {
@@ -20,6 +49,7 @@ class Pacman
       this.startingAngle = Math.PI*2 ; 
       this.closingAngle = 0 ;
       this.radius = 15
+
       this.rotation = 0 
     }
 
@@ -33,28 +63,35 @@ class Pacman
       ctx.fill();
     }
 
-    updatePacmanPosition(){
-      ctx.save() //look this up //we only want to rotate pacman llook up translate and rotate
-      ctx.translate(this.position.x,this.position.y)
+    //Update Pacman Position, direction and chomp feature 
+    //Rotate direction of pacmans mouth depending on velococity(direction)
+    //Using translate function. Only rotate pacman, then retranslate back. 
+    updatePacmanPosition()
+    {
+      ctx.save()
+      ctx.translate(this.position.x,this.position.y)      //rotate pacman
       ctx.rotate(this.rotation)
-      ctx.translate(-this.position.x,-this.position.y) //change back 
+      ctx.translate(-this.position.x,-this.position.y)    //change back 
       this.drawPacman();
       this.position.x += this.velocity.x;
       this.position.y += this.velocity.y;
 
-      //make the mouth chomp
+      //Pacman Chomp Feature 
       if(this.radians < 0 || this.radians > .75)
       {
        this.chompRate = -this.chompRate
-
       }
       this.radians += this.chompRate
       ctx.restore()
     }  
-  
 };
 
-class Pellets                                      //Create a pacman class that takes in a position and veloctiy object 
+/*******************************************************
+                      Pellets Class
+Constructor takes in a position object. Position object 
+contains x and y values where pellet will be drawn. 
+********************************************************/
+class Pellets                                     
 {
       constructor({position}) {
       this.position = position
@@ -63,14 +100,19 @@ class Pellets                                      //Create a pacman class that 
       this.radius = 3
     }
     drawPellet(){
-      ctx.beginPath();                            //x,y is the center of the pacman 
+      ctx.beginPath();                           
       ctx.arc(this.position.x,this.position.y,this.radius,this.startingAngle,this.closingAngle);
       ctx.fillStyle='white';
       ctx.fill();
     }
 };
 
-class PowerUp                                      //Create a pacman class that takes in a position and veloctiy object 
+/*******************************************************
+                      Power up Class
+Constructor takes in a position object. Position object 
+contains x and y values where PowerUp will be drawn. 
+********************************************************/
+class PowerUp                                      
 {
       constructor({position}) {
       this.position = position
@@ -79,24 +121,35 @@ class PowerUp                                      //Create a pacman class that 
       this.radius = 10
     }
     drawPowerUp(){
-      ctx.beginPath();                            //x,y is the center of the pacman 
+      ctx.beginPath();                             
       ctx.arc(this.position.x,this.position.y,this.radius,this.startingAngle,this.closingAngle);
       ctx.fillStyle='white';
       ctx.fill();
     }
 };
 
-
-
-class Ghost                                      //Create a gohst class that takes in a position and veloctiy object 
+/****************************************************************************************************
+                                          Ghost Class
+Constructor takes in a position object, velocity object. Position object contains x and y values where
+ghost will be drawn. Velocity object contains x and y value representing the 'velocity', which is the 
+number of pixels the ghost will move in the x or y direction per frame. Color is ghosts color. Ghost
+speed is static representing how many pixels the ghost will move per frame. Each ghost object has a 
+prevCollisions array which contains strings representing the direction which would cause a collision. 
+Ghost radius and angle represent the size/shape of ghost. Lastly, each ghost has a scared bool 
+attribute which turns to true only when pacman eats a powerup. When ghost is scared they may not eat
+pacwoman. When ghost is scared they are blue. 
+*****************************************************************************************************/
+class Ghost                                      
 {
-    static speed = 2
-    constructor({position,velocity,color ='red'}) {
+      static speed = 2
+
+      constructor({position,velocity,color ='red'}) 
+      {
       this.position = position
       this.velocity = velocity 
       this.speed = 2
       this.color = color
-      this.prevCollisions = []                  //Each instance of a ghost will have its own array of previous collisions
+      this.prevCollisions = []                 
       this.startingAngle = Math.PI*2; 
       this.closingAngle = 0;
       this.radius = 15
@@ -104,7 +157,7 @@ class Ghost                                      //Create a gohst class that tak
     }
 
     drawGhost(){
-      ctx.beginPath();                            //x,y is the center of the pacman 
+      ctx.beginPath();                            
       ctx.arc(this.position.x,this.position.y,this.radius,this.startingAngle,this.closingAngle);
       ctx.fillStyle= this.scared ? 'blue': this.color //if they are scared they are blue, if not they are their normal color
       ctx.fill();
@@ -115,10 +168,14 @@ class Ghost                                      //Create a gohst class that tak
       this.position.y += this.velocity.y;
       this.drawGhost();
     }  
-  
 };
-
-class Boundary                                    //Create a boundry class that takes in a position object
+/******************************************************************************************
+                                Boundry Class
+Boundry objects make up the map. Constructior takes in a position object and an image name. 
+The drawBoundry method calls the draw image function which draws the specified image at the 
+specified position. 
+******************************************************************************************/
+class Boundary                                   
 {
   static width = 40;
   static height = 40;
@@ -130,16 +187,17 @@ class Boundary                                    //Create a boundry class that 
     this.image = image
   }
   
-  drawBoundary()                                  //Boundry Class method to draw a boundry 
-    {                                   
-      ctx.drawImage(this.image,this.position.x,this.position.y)
-    }
+  drawBoundary()                                   
+  {                                   
+    ctx.drawImage(this.image,this.position.x,this.position.y)
+  }
 }
 
-
-
-
-//Function detect collision between a circle and a rectangle
+/*---------------------------------------------------------------------------------------
+              circleCollidesWithRectangle Function
+Function takes in a circle object and a rectangle object. 
+GO BACK AND COMMENT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+----------------------------------------------------------------------------------------*/
 function circleCollidesWithRectangle({circle,rectangle})
 {
     const padding = Boundary.width/2 - circle.radius -1   //minus one so its not actually touching
@@ -149,156 +207,187 @@ function circleCollidesWithRectangle({circle,rectangle})
     && circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width + padding)
 }
 
-  //An infinite loop called animate to redraw pacman and the map
-  let animationId = 0                                       //Holds the current frame number
-  function animate() 
-  {   
-     animationId = requestAnimationFrame(animate);            //Infinte loop RAF actually has a return type. It returns the frame number 
-                                                              //we will need this frame number for starting and pausing our game
-      ctx.clearRect(0,0,canvas.width,canvas.height);          //Clear the canvas
 
-      //Check if you should be allowed to move down
-      if (keys.up.pressed &&lastKey == 'up' )
-      {                //When up key is pressed
-          for(let i = 0; i<boundaries.length;i++)
+/*---------------------------------------------------------------------------------------
+                    checkEatPowerUps Function
+Function calls the draw power up function to draw the power up. 
+Function then checks if the pacman is colliding with the power up, if true, eat it. 
+If pacman eats power up make ghosts scared for 5 seconds. 
+----------------------------------------------------------------------------------------*/
+function checkEatPowerUps(){
+      for(let i = powerUps.length-1;0 <= i; i--)                    //iterate through the powerups
+      {
+        const powerUp = powerUps[i]
+        powerUp.drawPowerUp()                                       //draw the power up
+  
+        //Check for collisions between pacman and powerup. If collision you "eat" the powerup
+        if (Math.hypot(powerUp.position.x - pacman.position.x,      
+          powerUp.position.y - pacman.position.y) < powerUp.radius + pacman.radius)
           {
-              const boundary = boundaries[i]               //Loop through boundies and check for collision when up is pressed                         
-              //If you have a collision between the new copied pacman object with a changed velocity of -5 then break
-              //else if theres no collision you are allowed to change the original pacmans velocity to -5 
-              if (circleCollidesWithRectangle({
-                circle: {...pacman,velocity:{           //test what happens if you let velocity = - 5
-                  x: 0,
-                  y: -5                                //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-                }},                                    //pass current packman through while only editing its velocity 
-                rectangle: boundary}))                                             //Spread operator to copy pacman object and edit the velcotiy 
-              {
-                pacman.velocity.y = 0                               //stop pacman if ANY boundry is colliding 
-                break                                               //Break out do not check the other boundries after one collision has been found you cannot go up
+            console.log('Power Up!')
+            powerUps.splice(i,1)                                    //"Eat" power up, remove it from powerup array  
+            ghosts.forEach(ghost =>
+            {                                                       //Make all ghosts scared property set to true
+              ghost.scared = true
+              setTimeout(()=>{
+                ghost.scared = false                                //Ghost scared property to false after 5 seconds
+              }, 5000)
+            })
+          }
+      }
+}
+/*---------------------------------------------------------------------------------------
+                    checkGhostPacmanCollision Function
+Checks for collision between ghost and pacman, circle to circle collision. 
+----------------------------------------------------------------------------------------*/
+function checkGhostPacmanCollision()
+{
+for(let i = ghosts.length-1;0 <= i; i--)              //Iterate through ghost array 
+{
+  const ghost = ghosts[i]
+                                                      //check for collison
+    if (Math.hypot(ghost.position.x - pacman.position.x,
+      ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius )
+      {
+        if(ghost.scared)                              //if collision, check if ghost is scared. 
+        {
+          ghosts.splice(i,1)                          //if ghost is scared and collision is true then removed the ghost from array 
+        }
+        else
+        {
+        cancelAnimationFrame(animationId)             //pass in the current frame to cancel the animation frame(stop the game)
+        console.log("You lose!")
+        ctx.font = "30px Comic Sans MS";
+        ctx.fillStyle = "red";
+        ctx.textAlign = "center";
+        ctx.fillText("Game Over", canvas.width/2, canvas.height/2);
+        }
+      }
+}
+}
+
+/*---------------------------------------------------------------------------------------
+                    animate function
+Controls  game animation using requestAnimationFrame function. 
+RequestAnimationFrame will call function passed into it in a continous loop. 
+----------------------------------------------------------------------------------------*/
+function animate() 
+{   
+     animationId = requestAnimationFrame(animate);            //RequestAnimationFrame has return type int containing frame id 
+     ctx.clearRect(0,0,canvas.width,canvas.height);           //Clear the canvas
+
+                                                              //If up is currently pressed and was also last key pressed
+      if (keys.up.pressed &&lastKey == 'up' )
+      {             
+          for(let i = 0; i<boundaries.length;i++)             //Loop through boundies array check for collision when up is pressed  
+          {
+              const boundary = boundaries[i]                                     
+              if (circleCollidesWithRectangle({               //Test if predicted collision using a copy of the pacman and each boundry in the boudry array
+                circle: {...pacman,velocity:{                 //Use spread operator to make deep copy of pacmans velocity object 
+                  x: 0,                 
+                  y: -5                                       //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
+                }},                                           //pass current packman through while only editing its velocity 
+                rectangle: boundary}))                  
+              {                                               //If pacman collided with a boundry stop him
+                pacman.velocity.y = 0                         //stop pacman if ANY boundry is predicted to be colliding and then break 
+                break                                         //Break out do not check the other boundries after one collision has been found you cannot go up
               }
               else{
-                pacman.velocity.y = -5                              //If there is no predicited collision pacman go up
+                pacman.velocity.y = -5                        //If there is no predicited collision let real pacman go up
               }
           }
       } 
-      
-      //Check if your able to move down
-      else if(keys.down.pressed && lastKey == 'down')
+      else if(keys.down.pressed && lastKey == 'down')        //Check if your able to move down using same steps as we did above
       {
         for(let i = 0; i<boundaries.length;i++)
         {
-            const boundary = boundaries[i]               //Loop through boundies and check for collision when up is pressed                         
-            //If you have a collision between the new copied pacman object with a changed velocity of -5 then break
-            //else if theres no collision you are allowed to change the original pacmans velocity to -5 
+            const boundary = boundaries[i]               
             if (circleCollidesWithRectangle({
-              circle: {...pacman,velocity:{           //test what happens if you let velocity = - 5
+              circle: {...pacman,velocity:{           
                 x: 0,
-                y: 5                                //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-              }},                                    //pass current packman through while only editing its velocity 
-              rectangle: boundary}))                                             //Spread operator to copy pacman object and edit the velcotiy 
+                y: 5                                
+              }},                                 
+              rectangle: boundary}))                                   
             {
-              pacman.velocity.y = 0                               //stop pacman if ANY boundry is colliding 
-              break                                               //Break out do not check the other boundries after one collision has been found you cannot go down
+              pacman.velocity.y = 0                              
+              break                                          
             }
             else{
-              pacman.velocity.y = 5                              //If there is no predicited collision pacman go down
+              pacman.velocity.y = 5                           
             }
         }      
       } 
-      //Check if you should be able to move left
-      else if(keys.left.pressed && lastKey == 'left')
+      else if(keys.left.pressed && lastKey == 'left')       //Check if you should be able to move left using same steps as above
       {
         for(let i = 0; i<boundaries.length;i++)
         {
-            const boundary = boundaries[i]               //Loop through boundies and check for collision when up is pressed                         
-            //If you have a collision between the new copied pacman object with a changed velocity of -5 then break
-            //else if theres no collision you are allowed to change the original pacmans velocity to -5 
+            const boundary = boundaries[i]               
             if (circleCollidesWithRectangle({
-              circle: {...pacman,velocity:{           //test what happens if you let velocity = - 5
+              circle: {...pacman,velocity:{           
                 x: -5,
-                y: 0                                //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-              }},                                    //pass current packman through while only editing its velocity 
-              rectangle: boundary}))                  //Called the Spread operator to copy pacman object and edit the velcotiy 
+                y: 0                               
+              }},                                 
+              rectangle: boundary}))                 
             {
-              pacman.velocity.x = 0                               //stop pacman if ANY boundry is colliding 
-              break                                               //Break out do not check the other boundries after one collision has been found you cannot go left
+              pacman.velocity.x = 0                            
+              break                                               
             }
             else{
-              pacman.velocity.x = -5                              //If there is no predicited collision pacman go left
+              pacman.velocity.x = -5                          
             }
         } 
       } 
-      else if(keys.right.pressed && lastKey == 'right')
+      else if(keys.right.pressed && lastKey == 'right')     //Check if you should be able to move right using same steps as above
       {
         for(let i = 0; i<boundaries.length;i++)
         {
-            const boundary = boundaries[i]               //Loop through boundies and check for collision when up is pressed                         
-            //If you have a collision between the new copied pacman object with a changed velocity of -5 then break
-            //else if theres no collision you are allowed to change the original pacmans velocity to -5 
+            const boundary = boundaries[i]             
             if (circleCollidesWithRectangle({
-              circle: {...pacman,velocity:{           //test what happens if you let velocity = - 5
+              circle: {...pacman,velocity:{           
                 x: 5,
-                y: 0                                //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-              }},                                    //pass current packman through while only editing its velocity 
-              rectangle: boundary}))                  //Called the Spread operator to copy pacman object and edit the velcotiy 
+                y: 0                              
+              }},                                     
+              rectangle: boundary}))                  
             {
-              pacman.velocity.x = 0                               //stop pacman if ANY boundry is colliding 
-              break                                               //Break out do not check the other boundries after one collision has been found you cannot go right
+              pacman.velocity.x = 0                               
+              break                                             
             }
             else{
-              pacman.velocity.x = 5                              //If there is no predicited collision pacman go right
+              pacman.velocity.x = 5                              
             }
         } 
       }
 
+    checkEatPowerUps();
 
+    checkGhostPacmanCollision();
+    
+// //dectect collison between ghost and player
+//   for(let i = ghosts.length-1;0 <= i; i--)
+//   {
+//     const ghost = ghosts[i]
 
-//PACMAN POWER UP
-//for drawing power ups and deteting for collision and eating them
-for(let i = powerUps.length-1;0 <= i; i--)
-{
-  const powerUp = powerUps[i]
-  powerUp.drawPowerUp()
-
-  if (Math.hypot(powerUp.position.x - pacman.position.x,
-    powerUp.position.y - pacman.position.y) < powerUp.radius + pacman.radius)
-    {
-      console.log('Power Up!')
-      powerUps.splice(i,1)
-
-      //make ghosts scared
-      //loop over every ghost
-      ghosts.forEach(ghost =>{
-        ghost.scared = true
-        //here the ghost is scared
-
-        setTimeout(()=>{
-          ghost.scared = false
-          //ghost not scared anymore after 5 seconds
-        }, 5000)
-      })
-
-    }
-}
-//dectect collison between ghost and player
-  for(let i = ghosts.length-1;0 <= i; i--)
-  {
-    const ghost = ghosts[i]
-
-      //collison between ghost and pacman
-      if (Math.hypot(ghost.position.x - pacman.position.x,
-        ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius )
-        {
-          if(ghost.scared)
-          {
-            ghosts.splice(i,1)
-          }
-          else
-          {
-            cancelAnimationFrame(animationId) //pass in the current frame to cancel 
-            console.log("You lose!")
-          }
-        }
-  }
+//       //collison between ghost and pacman
+//       if (Math.hypot(ghost.position.x - pacman.position.x,
+//         ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius )
+//         {
+//           if(ghost.scared)
+//           {
+//             ghosts.splice(i,1)
+//           }
+//           //Pacman dies 
+//           else
+//           {
+//             cancelAnimationFrame(animationId) //pass in the current frame to cancel 
+//             // console.log("You lose!")
+//             // endGame();
+//             ctx.font = "30px Comic Sans MS";
+//           ctx.fillStyle = "red";
+//           ctx.textAlign = "center";
+//           ctx.fillText("Hello World", canvas.width/2, canvas.height/2);
+//           }
+//         }
+//   }
 
       //eating the pellets and adding to score
       for(let i = pellets.length-1;0 <= i; i--)
@@ -322,9 +411,6 @@ for(let i = powerUps.length-1;0 <= i; i--)
           cancelAnimationFrame(animationId)
         }
       }
-
-
-
 
 
       //This checks if you have hit a wall while going in a stright direction
@@ -501,7 +587,9 @@ for(let i = powerUps.length-1;0 <= i; i--)
 
 
 
-
+/*******************************************************
+                    Event Listeners
+********************************************************/
  //Detect key down
  addEventListener('keydown',({key}) => 
  {
@@ -570,7 +658,7 @@ for(let i = powerUps.length-1;0 <= i; i--)
 
   }
 
-
+let animationId = 0                                         //Holds the current frame number
 let lastKey = ''
 let score =0
 
@@ -579,6 +667,8 @@ let score =0
 const boundaries = []
 const pellets = []
 const powerUps = []
+
+//Create Ghosts
 const ghosts = [
   new Ghost(
     {
@@ -606,7 +696,7 @@ const ghosts = [
   })
 ]
 
-// Make a pacman girl 
+// Create a new pacwoman
 const pacman = new Pacman(
   {
     position:{
@@ -619,10 +709,9 @@ const pacman = new Pacman(
     }
   });
 
-
-
-
-
+/*******************************************************
+Main
+********************************************************/
 animate();
 
 
