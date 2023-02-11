@@ -1,15 +1,15 @@
-/*-----------------------------------------------------
+/*----------------------------------------------------------------------------
               Canvas Setup
-------------------------------------------------------*/
+-----------------------------------------------------------------------------*/
 const canvas = document.getElementById('canvas'); //Create a canvas and give it a 2D context 
 const ctx = canvas.getContext('2d');
 const scoreE = document.getElementById('scoreE'); //Create a canvas and give it a 2D context 
 canvas.width = 445
 canvas.height = 525
 
-/*-----------------------------------------------------
+/*----------------------------------------------------------------------------
               startGame Function
-------------------------------------------------------*/
+-----------------------------------------------------------------------------*/
 function startGame()
 {
 toggleScreen('canvas',true)
@@ -17,17 +17,17 @@ toggleScreen('scoreboard',true)
 toggleScreen('start-screen',false)
 
 }
-/*-----------------------------------------------------
+/*----------------------------------------------------------------------------
               endGame Function
-------------------------------------------------------*/
+----------------------------------------------------------------------------*/
 function endGame()
 {
   toggleScreen('gameOver',true)
 }
 
-/*-----------------------------------------------------
+/*----------------------------------------------------------------------------
               toggleScreen Function
-------------------------------------------------------*/
+-----------------------------------------------------------------------------*/
 function toggleScreen(id,toggle)
 {
 let element = document.getElementById(id);
@@ -35,10 +35,9 @@ let display = (toggle) ? 'block' : 'none'
 element.style.display = display;
 }
 
-/*******************************************************
+/*******************************************************************
                       Pacman Class
-
-********************************************************/
+********************************************************************/
 class Pacman                                     
 {
     constructor({position,velocity}) {
@@ -49,7 +48,6 @@ class Pacman
       this.startingAngle = Math.PI*2 ; 
       this.closingAngle = 0 ;
       this.radius = 15
-
       this.rotation = 0 
     }
 
@@ -62,19 +60,21 @@ class Pacman
       ctx.fillStyle='yellow';
       ctx.fill();
     }
-
-    //Update Pacman Position, direction and chomp feature 
-    //Rotate direction of pacmans mouth depending on velococity(direction)
-    //Using translate function. Only rotate pacman, then retranslate back. 
+    /*-------------------------------------------------------------------------
+                  updatepacman Method    
+    Update Pacman Position, direction and chomp feature 
+    Rotate direction of pacmans mouth depending on velococity(direction)
+    Using translate function. Only rotate pacman, then retranslate back. 
+    --------------------------------------------------------------------------*/
     updatePacmanPosition()
     {
-      ctx.save()
-      ctx.translate(this.position.x,this.position.y)      //rotate pacman
-      ctx.rotate(this.rotation)
-      ctx.translate(-this.position.x,-this.position.y)    //change back 
-      this.drawPacman();
-      this.position.x += this.velocity.x;
-      this.position.y += this.velocity.y;
+      ctx.save()                                          //Save current canvas before applying the rotate effect
+      ctx.translate(this.position.x,this.position.y)      //translate center of canvas temporarily to pacmans x y coordinates so we can rotate from his center
+      ctx.rotate(this.rotation)                           //Rotate the canvas based on pacmans rotate attribute
+      ctx.translate(-this.position.x,-this.position.y)    //Set center of canvas back to center of canvas
+      this.drawPacman();                                  //Draw pacman
+      this.position.x += this.velocity.x;                 //Update velocity x
+      this.position.y += this.velocity.y;                 //Update velocity y
 
       //Pacman Chomp Feature 
       if(this.radians < 0 || this.radians > .75)
@@ -82,8 +82,18 @@ class Pacman
        this.chompRate = -this.chompRate
       }
       this.radians += this.chompRate
-      ctx.restore()
+      ctx.restore()                                       //Restore the canvase
     }  
+    /*-----------------------------------------------------------------------------
+                  rotate Pacman Method
+    Update pacman rotation attribute  based on velocity (direction) he is moving 
+    ------------------------------------------------------------------------------*/
+    rotatePacman(){
+      if(this.velocity.x > 0 ) this.rotation = 0
+      else if(this.velocity.x < 0) this.rotation = Math.PI   
+      else if(this.velocity.y > 0) this.rotation = Math.PI/2  
+      else if(this.velocity.y < 0) this.rotation = Math.PI * 1.5 
+    }
 };
 
 /*******************************************************
@@ -193,11 +203,11 @@ class Boundary
   }
 }
 
-/*---------------------------------------------------------------------------------------
+/*------------------------------------------------------------------------------------------------------------
               circleCollidesWithRectangle Function
-Function takes in a circle object and a rectangle object. 
-GO BACK AND COMMENT HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-----------------------------------------------------------------------------------------*/
+Function takes in a circle object and a rectangle object, detects collision. 
+Returns a bool true if a collision has been detected. 
+-------------------------------------------------------------------------------------------------------------*/
 function circleCollidesWithRectangle({circle,rectangle})
 {
     const padding = Boundary.width/2 - circle.radius -1   //minus one so its not actually touching
@@ -205,6 +215,37 @@ function circleCollidesWithRectangle({circle,rectangle})
     && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x - padding
     && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y - padding
     && circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width + padding)
+}
+
+/*---------------------------------------------------------------------------------------
+                    checkEat Pellets Function
+Checks for collision between pellets and pacman, circle to circle collision. If collision
+pacman "eats" pellet. Remove pellet once eaten. No more pellets left then, win game. 
+----------------------------------------------------------------------------------------*/
+function checkEatPellets(){      
+    for(let i = pellets.length-1;0 <= i; i--)
+    {
+      const pellet = pellets[i]
+      pellet.drawPellet()
+        if (Math.hypot(pellet.position.x - pacman.position.x,   //circle to circle collision
+          pellet.position.y - pacman.position.y) < pellet.radius + pacman.radius)
+        {
+          pellets.splice(i,1)
+          score +=10;
+          scoreE.innerHTML =score
+        }
+
+         //Win condition if 0 pellets left
+        if(pellets.length == 0)
+        {
+          console.log('You won!')
+          ctx.font = "30px Comic Sans MS";
+          ctx.fillStyle = "red";
+          ctx.textAlign = "center";
+          ctx.fillText("Winner", canvas.width/2, canvas.height/2);
+          cancelAnimationFrame(animationId);//end game
+        }
+    }
 }
 
 
@@ -244,8 +285,7 @@ function checkGhostPacmanCollision()
 {
 for(let i = ghosts.length-1;0 <= i; i--)              //Iterate through ghost array 
 {
-  const ghost = ghosts[i]
-                                                      //check for collison
+  const ghost = ghosts[i]                             //check for collison
     if (Math.hypot(ghost.position.x - pacman.position.x,
       ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius )
       {
@@ -263,384 +303,277 @@ for(let i = ghosts.length-1;0 <= i; i--)              //Iterate through ghost ar
         ctx.fillText("Game Over", canvas.width/2, canvas.height/2);
         }
       }
+  }
 }
+
+/*---------------------------------------------------------------------------------------
+                    checkChangePacmanVeloctiy Function
+Function draws boundries and checks for collisions between pacman and draw boundries. 
+Function "predicts" collisions before allowing pacman to move in a desired direction.
+Desired direction is detected with event listers outside of this function which initialize
+keys.pressed and lastKey. 
+If no  collision is going to occur then allow pacman to change velocity. If desired velocity 
+change would cause a collision then stop pacman, set velocity to zero. 
+----------------------------------------------------------------------------------------*/
+function checkChangePacmanVelocity()
+{
+    if (keys.up.pressed &&lastKey == 'up' )
+    {             
+        for(let i = 0; i<boundaries.length;i++)             //Loop through boundies array check for collision when up is pressed  
+        {
+            const boundary = boundaries[i]                                     
+            if (circleCollidesWithRectangle({               //Test if predicted collision using a copy of the pacman and each boundry in the boudry array
+              circle: {...pacman,velocity:{                 //Use spread operator to make deep copy of pacmans velocity object 
+                x: 0,                 
+                y: -5                                       //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
+              }},                                           //pass current packman through while only editing its velocity 
+              rectangle: boundary}))                  
+            {                                               //If pacman collided with a boundry stop him
+              pacman.velocity.y = 0                         //stop pacman if ANY boundry is predicted to be colliding and then break 
+              break                                         //Break out do not check the other boundries after one collision has been found you cannot go up
+            }
+            else{
+              pacman.velocity.y = -5                        //If there is no predicited collision let real pacman go up
+            }
+        }
+    } 
+    else if(keys.down.pressed && lastKey == 'down')         //Check if your able to move down using same steps as we did above
+    {
+      for(let i = 0; i<boundaries.length;i++)
+      {
+          const boundary = boundaries[i]               
+          if (circleCollidesWithRectangle({
+            circle: {...pacman,velocity:{           
+              x: 0,
+              y: 5                                
+            }},                                 
+            rectangle: boundary}))                                   
+          {
+            pacman.velocity.y = 0                              
+            break                                          
+          }
+          else{
+            pacman.velocity.y = 5                           
+          }
+      }      
+    } 
+    else if(keys.left.pressed && lastKey == 'left')       //Check if you should be able to move left using same steps as above
+    {
+      for(let i = 0; i<boundaries.length;i++)
+      {
+        const boundary = boundaries[i]             
+          if (circleCollidesWithRectangle({
+          circle: {...pacman,velocity:{           
+            x: -5,
+            y: 0                               
+          }},                                 
+          rectangle: boundary}))                 
+          {
+            pacman.velocity.x = 0                            
+            break                                               
+          }
+          else{
+          pacman.velocity.x = -5                          
+        }
+      } 
+    } 
+    else if(keys.right.pressed && lastKey == 'right')     //Check if you should be able to move right using same steps as above
+    {
+      for(let i = 0; i<boundaries.length;i++)
+      {
+        const boundary = boundaries[i]             
+        if (circleCollidesWithRectangle({
+          circle: {...pacman,velocity:{           
+            x: 5,
+            y: 0                              
+          }},                                     
+          rectangle: boundary}))                  
+        {
+          pacman.velocity.x = 0                               
+          break                                             
+        }
+        else{
+          pacman.velocity.x = 5                              
+        }
+      } 
+    }
+
+    //Check collision while going straight direction
+      boundaries.forEach((boundary)=> 
+      {                                   
+        boundary.drawBoundary()           //Loop through boundries array & draw boundries
+        if (
+          circleCollidesWithRectangle({  //While looping through and drawing boundries also check if pacman if colliding with the boundary 
+          circle: pacman,
+          rectangle: boundary
+        })
+        ) {                              //If a collision occours while going straight then stop pacman
+            pacman.velocity.x=0          //Reset pacmans x velocity 
+            pacman.velocity.y=0          //Reset pacmans y velocity 
+          }                                            
+      }) 
+}
+
+
+/*---------------------------------------------------------------------------------------
+                    checkGhostCollision function
+Functions handles ghost AI (deciding where they will go next).
+Function avoids collisions with boundries and updates ghost velocities. 
+----------------------------------------------------------------------------------------*/
+function checkGhostCollision(){
+  //Loop through ghosts array for each ghost
+  ghosts.forEach((ghost) =>
+  {
+        ghost.updateGhost();                                          //update ghost/redraw
+        const currentCollisions = []                                  //Make an array to hold current collisions of this particular ghost
+
+      boundaries.forEach(boundary=>                                   //Loop through every boundry
+      {
+        //Check right direction
+          if (                        
+            !currentCollisions.includes('right') &&                   //if the currentCollisions doesnt include "right" and your hitting the left side of a boundry
+            circleCollidesWithRectangle({
+              circle: 
+              {
+                  ...ghost,velocity:{                                 //Spread operator to make copy of current ghost so we can anticpate changing his veloctiy
+                  x: ghost.speed,                                     //test on coppied object if you let velocity in positive x direction(right) = ghost speed which is 2 will collison occour?
+                  y: 0                                
+                }
+              },                                      
+              rectangle: boundary                                     //test against current boundry
+            })
+          ){
+            currentCollisions.push('right')                           //If true then add "right" string to the currentCollisions
+          }
+
+        //Check left direction using same steps as above for "check right"
+          if (
+            !currentCollisions.includes('left') &&  
+            circleCollidesWithRectangle({
+              circle: {
+                  ...ghost,velocity:{          
+                  x: -ghost.speed,                                    //Set copied ghost obj x velocity to -ghost speed(-2) representing left direction         
+                  y: 0                                
+                }
+              },                                    
+              rectangle: boundary                                     //Check anticpated move left against each boundry
+            })
+          ){
+            currentCollisions.push('left')                            //If left boundry will be a collision & "left" not in currentCollisons array then add it
+          }
+
+          //Check up direction direction using same steps as above for "check right"
+          if (
+            !currentCollisions.includes('up') &&  
+            circleCollidesWithRectangle({
+              circle: {
+                  ...ghost,velocity:{           
+                  x: 0,
+                  y: -ghost.speed                                     //Set copied ghost obj y velocity to -ghost speed(-2) representing up direction           
+                }
+              },                                    
+              rectangle: boundary                                     //Check anticpated move up against each boundry
+            })
+          ){
+            currentCollisions.push('up')              
+          }
+
+          //Check down direction direction using same steps as above for "check right"
+          if (
+            !currentCollisions.includes('down') &&  
+            circleCollidesWithRectangle({
+              circle: {
+                  ...ghost,velocity:{          
+                  x: 0,
+                  y: ghost.speed                                      //Set copied ghost obj y velocity to ghost speed(2) representing down direction              
+                }
+              },                                
+              rectangle: boundary                                     //Check anticpated move down against each boundry 
+            })
+          ){
+            currentCollisions.push('down')                            //If down boundry will be a collision & "down" not in currentCollisons array then add it
+          }   
+      })
+
+      
+
+      if(currentCollisions.length > ghost.prevCollisions.length)      //If ghost new position has greater # possile collisions than his last positions possible collisions
+      {                                                               //then the # of available directions he may go has been reduced, then update it. 
+      ghost.prevCollisions = currentCollisions                        //Update the ghosts prevCollisons array with current collisions
+      }
+
+                                                                      //If current collisions is different than his previous collisions then he has less collisions
+      if (JSON.stringify(currentCollisions)                           //Than he did last frame so new pathways have opened up. 
+      != JSON.stringify(ghost.prevCollisions))                        //Add his current direction to his "previous collisions" because will use this 
+      {
+        if(ghost.velocity.x>0)                                        //if ghost is traveling right add it to prev coll
+        {
+          ghost.prevCollisions.push('right')
+        }
+        else if(ghost.velocity.x<0)                                   //if ghost is traveling left add it to prev coll
+        {
+          ghost.prevCollisions.push('left')
+        }
+        else if(ghost.velocity.y<0)                                   //if ghost is traveling up add it to prev coll
+        {
+          ghost.prevCollisions.push('up')
+        }
+        else if(ghost.velocity.y>0)                                   //if ghost is traveling down add it to prev coll
+        {
+          ghost.prevCollisions.push('down')
+        }
+                                                                      //Create a "pathways" array holding the current possible pathwaysa ghost may take at any given second
+        const pathways = ghost.prevCollisions.filter(collision =>     //The filter() method creates a new array filled w elements that pass a test provided by a function.
+        {                                                             //Include any paths that were in previous collisions but are not in current collisions in to pathways
+        return !currentCollisions.includes(collision)                 //This will return any "opened up" paths as well as the current direction the ghost is traveling in already  
+        })
+
+        const direction = pathways[Math.floor(Math.random() * pathways.length)]//Pick a random direction from your pathways.        
+                                                                      //Random returns a float between 0 and 1. Take the floor so you get an int.                                                               
+        switch(direction)                                             //change ghost velcotiy  based on the radnom direction chosen 
+        {
+          case 'down':
+            ghost.velocity.y=ghost.speed
+            ghost.velocity.x=0
+            break
+          case 'up':
+            ghost.velocity.y=-ghost.speed
+            ghost.velocity.x=0
+            break
+          case 'right':
+            ghost.velocity.y=0
+            ghost.velocity.x=ghost.speed
+            break
+          case 'left':
+            ghost.velocity.y=0
+            ghost.velocity.x=-ghost.speed
+            break
+        }
+        ghost.prevCollisions =[]                                     //Reeset the collision now that your moving in a new direction
+      }
+    })
 }
 
 /*---------------------------------------------------------------------------------------
                     animate function
-Controls  game animation using requestAnimationFrame function. 
+Controls game animation using requestAnimationFrame function. 
 RequestAnimationFrame will call function passed into it in a continous loop. 
 ----------------------------------------------------------------------------------------*/
 function animate() 
 {   
-     animationId = requestAnimationFrame(animate);            //RequestAnimationFrame has return type int containing frame id 
-     ctx.clearRect(0,0,canvas.width,canvas.height);           //Clear the canvas
-
-                                                              //If up is currently pressed and was also last key pressed
-      if (keys.up.pressed &&lastKey == 'up' )
-      {             
-          for(let i = 0; i<boundaries.length;i++)             //Loop through boundies array check for collision when up is pressed  
-          {
-              const boundary = boundaries[i]                                     
-              if (circleCollidesWithRectangle({               //Test if predicted collision using a copy of the pacman and each boundry in the boudry array
-                circle: {...pacman,velocity:{                 //Use spread operator to make deep copy of pacmans velocity object 
-                  x: 0,                 
-                  y: -5                                       //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-                }},                                           //pass current packman through while only editing its velocity 
-                rectangle: boundary}))                  
-              {                                               //If pacman collided with a boundry stop him
-                pacman.velocity.y = 0                         //stop pacman if ANY boundry is predicted to be colliding and then break 
-                break                                         //Break out do not check the other boundries after one collision has been found you cannot go up
-              }
-              else{
-                pacman.velocity.y = -5                        //If there is no predicited collision let real pacman go up
-              }
-          }
-      } 
-      else if(keys.down.pressed && lastKey == 'down')        //Check if your able to move down using same steps as we did above
-      {
-        for(let i = 0; i<boundaries.length;i++)
-        {
-            const boundary = boundaries[i]               
-            if (circleCollidesWithRectangle({
-              circle: {...pacman,velocity:{           
-                x: 0,
-                y: 5                                
-              }},                                 
-              rectangle: boundary}))                                   
-            {
-              pacman.velocity.y = 0                              
-              break                                          
-            }
-            else{
-              pacman.velocity.y = 5                           
-            }
-        }      
-      } 
-      else if(keys.left.pressed && lastKey == 'left')       //Check if you should be able to move left using same steps as above
-      {
-        for(let i = 0; i<boundaries.length;i++)
-        {
-            const boundary = boundaries[i]               
-            if (circleCollidesWithRectangle({
-              circle: {...pacman,velocity:{           
-                x: -5,
-                y: 0                               
-              }},                                 
-              rectangle: boundary}))                 
-            {
-              pacman.velocity.x = 0                            
-              break                                               
-            }
-            else{
-              pacman.velocity.x = -5                          
-            }
-        } 
-      } 
-      else if(keys.right.pressed && lastKey == 'right')     //Check if you should be able to move right using same steps as above
-      {
-        for(let i = 0; i<boundaries.length;i++)
-        {
-            const boundary = boundaries[i]             
-            if (circleCollidesWithRectangle({
-              circle: {...pacman,velocity:{           
-                x: 5,
-                y: 0                              
-              }},                                     
-              rectangle: boundary}))                  
-            {
-              pacman.velocity.x = 0                               
-              break                                             
-            }
-            else{
-              pacman.velocity.x = 5                              
-            }
-        } 
-      }
-
-    checkEatPowerUps();
-
-    checkGhostPacmanCollision();
-    
-// //dectect collison between ghost and player
-//   for(let i = ghosts.length-1;0 <= i; i--)
-//   {
-//     const ghost = ghosts[i]
-
-//       //collison between ghost and pacman
-//       if (Math.hypot(ghost.position.x - pacman.position.x,
-//         ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius )
-//         {
-//           if(ghost.scared)
-//           {
-//             ghosts.splice(i,1)
-//           }
-//           //Pacman dies 
-//           else
-//           {
-//             cancelAnimationFrame(animationId) //pass in the current frame to cancel 
-//             // console.log("You lose!")
-//             // endGame();
-//             ctx.font = "30px Comic Sans MS";
-//           ctx.fillStyle = "red";
-//           ctx.textAlign = "center";
-//           ctx.fillText("Hello World", canvas.width/2, canvas.height/2);
-//           }
-//         }
-//   }
-
-      //eating the pellets and adding to score
-      for(let i = pellets.length-1;0 <= i; i--)
-      {
-        const pellet = pellets[i]
-        pellet.drawPellet()
-        //diff between to x and two y coords 
-        if (Math.hypot(pellet.position.x - pacman.position.x,
-          pellet.position.y - pacman.position.y) < pellet.radius + pacman.radius)
-        {
-          pellets.splice(i,1)
-          score +=10;
-          scoreE.innerHTML =score
-        }
-
-         //Win condition goes here //his was not in this for loop but idk
-         //THIS IS WHRER YOU CAN MAKE ANOTHER LEVEL
-        if(pellets.length == 0)
-        {
-          console.log('You won!')
-          cancelAnimationFrame(animationId)
-        }
-      }
+    animationId = requestAnimationFrame(animate);            //RequestAnimationFrame with animate function. Return type int containing frame id 
+    ctx.clearRect(0,0,canvas.width,canvas.height);           //Clear the canvas
+    checkChangePacmanVelocity();                              //Check for changes in velocity based on keys pressed                                  
+    checkEatPowerUps();                                       //Check if eating(colliding) a Powerup
+    checkGhostPacmanCollision();                              //Check is colliding with a ghost
+    checkEatPellets();                                        //Check if eating(colliding) a Pellet
+    pacman.updatePacmanPosition();                            //Update and redraw pacman 
+    checkGhostCollision();                                    //Ghost AI and collision detection
+    pacman.rotatePacman();   
+  }
 
 
-      //This checks if you have hit a wall while going in a stright direction
-      boundaries.forEach((boundary)=> 
-      { //Loop through boundries array & draw boundries
-          boundary.drawBoundary()
-            if (
-              circleCollidesWithRectangle({
-              circle: pacman,
-              rectangle: boundary
-            })
-            ) {
-                pacman.velocity.x=0          //Reset pacmans velocity 
-                pacman.velocity.y=0
-              }                                            
-      }) 
-      
-      pacman.updatePacmanPosition();     //Update and redraw pacman 
-          
-        //Loop through ghosts array
-        ghosts.forEach((ghost) =>
-        {
-              ghost.updateGhost();          //update ghost/redraw
-              const collisions = []         //Make an array to hold collisions
-
-              //Loop through every boundry
-            boundaries.forEach(boundary=>
-            {
-                if (
-                  !collisions.includes('right') &&  //if the array doesnt already include right and your hitting the left side of a boundry
-                  circleCollidesWithRectangle({
-                    circle: 
-                    {
-                        ...ghost,velocity:{           //test what happens if you let velocity = - 5
-                        x: ghost.speed,
-                        y: 0                                //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-                      }
-                    },                                    //pass current packman through while only editing its velocity 
-                    rectangle: boundary
-                  })
-                ){
-                  collisions.push('right')
-                }
-                if (
-                  !collisions.includes('left') &&  //if the array doesnt already include left 
-                  circleCollidesWithRectangle({
-                    circle: {
-                        ...ghost,velocity:{           //test what happens if you let velocity = - 5
-                        x: -ghost.speed,
-                        y: 0                                //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-                      }
-                    },                                    //pass current packman through while only editing its velocity 
-                    rectangle: boundary
-                  })
-                ){
-                  collisions.push('left')
-                }
-                if (
-                  !collisions.includes('up') &&  //if the array doesnt already include up
-                  circleCollidesWithRectangle({
-                    circle: {
-                        ...ghost,velocity:{           //test what happens if you let velocity = - 5
-                        x: 0,
-                        y: -ghost.speed                               //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-                      }
-                    },                                    //pass current packman through while only editing its velocity 
-                    rectangle: boundary
-                  })
-                ){
-                  collisions.push('up')
-                }
-                if (
-                  !collisions.includes('down') &&  //if the array doesnt already includ down
-                  circleCollidesWithRectangle({
-                    circle: {
-                        ...ghost,velocity:{           //test what happens if you let velocity = - 5
-                        x: 0,
-                        y: ghost.speed                               //use the copy of pacman that you made to change ONLY the veloctiy to test for is a collision would occour 
-                      }
-                    },                                    //pass current packman through while only editing its velocity 
-                    rectangle: boundary
-                  })
-                ){
-                  collisions.push('down')
-                }   
-            })
-
-
-            if(collisions.length > ghost.prevCollisions.length)
-            {
-            //If the current number of collisions is more than their previous number of collisions
-            ghost.prevCollisions = collisions   //Take the current collisions for each ghost and save it to their personal array of collisions
-            }
-
-            //were going to "stringify" this using JSON. This allow you to test the actual strings stored inside the arrays. 
-            //LOOK THIS UP MORE 
-            if (JSON.stringify(collisions) != JSON.stringify(ghost.prevCollisions))//if the number of possible collisions changes, goes down
-            {
-
-              //get any other pathways that the ghost can travel by adding the 
-              //direction they are currenly travleing to their previous collision
-              //if ghost is traveling right
-              if(ghost.velocity.x>0) 
-              {
-                ghost.prevCollisions.push('right')
-              }
-              //if ghost is traveling left
-              else if(ghost.velocity.x<0) 
-              {
-                ghost.prevCollisions.push('left')
-              }
-              //if ghost is traveling up
-              else if(ghost.velocity.y<0) 
-              {
-                ghost.prevCollisions.push('up')
-              }
-              //if ghost is traveling down
-              else if(ghost.velocity.y>0) 
-              {
-                ghost.prevCollisions.push('down')
-              }
-
-
-              //console.log(collisions)
-             // console.log(ghost.prevCollisions)
-              //LOOK UP FILTER function
-              //filter out any collisions that dont exsist in the first array 
-              const pathways = ghost.prevCollisions.filter(collision => 
-                {
-                //if original collisions array does not include the collision were currently looping over
-                return !collisions.includes(collision)
-                })
-                //console.log({pathways})
-              //Change the ghosts velocity when theres been a change in the number of avaiable paths 
-            
-              //pick a random path from your pathways. Take the floor so you get an int 
-              const direction = pathways[Math.floor(Math.random() * pathways.length)]
-
-             // console.log({direction})
-
-              //change velcotiy of ghost based on the direction
-              switch(direction){
-                case 'down':
-                  ghost.velocity.y=ghost.speed
-                  ghost.velocity.x=0
-                  break
-                case 'up':
-                  ghost.velocity.y=-ghost.speed
-                  ghost.velocity.x=0
-                  break
-                case 'right':
-                  ghost.velocity.y=0
-                  ghost.velocity.x=ghost.speed
-                  break
-                case 'left':
-                  ghost.velocity.y=0
-                  ghost.velocity.x=-ghost.speed
-                  break
-              }
-              
-              //need to reeset the collision now that your moving in a new direction
-              ghost.prevCollisions =[]
-            }
-          })
-
-     //if pacman is going right 
-     if(pacman.velocity.x > 0 ) pacman.rotation = 0
-     else if(pacman.velocity.x < 0) pacman.rotation = Math.PI   
-     else if(pacman.velocity.y > 0) pacman.rotation = Math.PI/2  
-     else if(pacman.velocity.y < 0) pacman.rotation = Math.PI * 1.5 
-
-  }//End of animate
-
-
-
-
-/*******************************************************
-                    Event Listeners
-********************************************************/
- //Detect key down
- addEventListener('keydown',({key}) => 
- {
-   if (key === 'ArrowUp') 
-   {
-     keys.up.pressed = true;
-     lastKey='up'   
-    } 
-   else if (key === 'ArrowDown') 
-   {
-     keys.down.pressed = true;
-     lastKey='down'   
-   } 
-   else if (key === 'ArrowLeft') 
-   { 
-    keys.left.pressed = true;
-    lastKey='left'   
-  } 
-   else if (key === 'ArrowRight') 
-   {
-      keys.right.pressed = true;
-      lastKey='right'   
-   }
- })
-
-  //Detect when a key is released
-  addEventListener('keyup',({key}) => 
-  {   
-    if (key === 'ArrowUp') 
-    {
-      keys.up.pressed = false;
-    } 
-    else if (key === 'ArrowDown') 
-    {
-      keys.down.pressed = false;
-    } 
-    else if (key === 'ArrowLeft') 
-    { 
-     keys.left.pressed = false;
-    } 
-    else if (key === 'ArrowRight') 
-    {
-       keys.right.pressed = false;
- 
-    }
-  })
-
-
-
-  //create an object to determine which keys are being pressed down
-  //Update these in the event listers
+  //Create a keys object with 4 key value pairs representing 4 directions
   const keys =
   {
     up:{
@@ -655,20 +588,62 @@ function animate()
     right:{
       pressed:false
     }
-
   }
 
-let animationId = 0                                         //Holds the current frame number
-let lastKey = ''
-let score =0
+/*---------------------------------------------------
+                    Event Listeners
+----------------------------------------------------*/
+ //Detect key down and update keys and last key
+ addEventListener('keydown',({key}) => 
+ {
+   if (key === 'ArrowUp'){
+     keys.up.pressed = true;
+     lastKey='up'   
+    } 
+   else if (key === 'ArrowDown') {
+     keys.down.pressed = true;
+     lastKey='down'   
+   } 
+   else if (key === 'ArrowLeft') { 
+    keys.left.pressed = true;
+    lastKey='left'   
+  } 
+   else if (key === 'ArrowRight') {
+      keys.right.pressed = true;
+      lastKey='right'   
+   }
+ })
 
+  //Detect when a key is released and update keys
+  addEventListener('keyup',({key}) => 
+  {   
+    if (key === 'ArrowUp') {
+      keys.up.pressed = false;
+    } 
+    else if (key === 'ArrowDown') {
+      keys.down.pressed = false;
+    } 
+    else if (key === 'ArrowLeft'){ 
+     keys.left.pressed = false;
+    } 
+    else if (key === 'ArrowRight') {
+       keys.right.pressed = false;
+    }
+  })
 
-//Make an array to hold your boundry objects
-const boundaries = []
-const pellets = []
-const powerUps = []
+/*---------------------------------------------------
+                    Create Variables
+----------------------------------------------------*/
+let animationId = 0                                     //Holds the current frame number
+let lastKey = ''                                        //Holds the lastKey presseed
+let score =0                                            //Holds the current score
+const boundaries = []                                   //Array to hold your boundary objects
+const pellets = []                                      //Array to hold your pellet objects
+const powerUps = []                                     //Array to hold your powerUp objects
 
-//Create Ghosts
+/*---------------------------------------------------
+            Create Ghost Objects
+----------------------------------------------------*/
 const ghosts = [
   new Ghost(
     {
@@ -696,7 +671,9 @@ const ghosts = [
   })
 ]
 
-// Create a new pacwoman
+/*---------------------------------------------------
+            Create Pacman Object
+----------------------------------------------------*/
 const pacman = new Pacman(
   {
     position:{
@@ -709,9 +686,7 @@ const pacman = new Pacman(
     }
   });
 
-/*******************************************************
-Main
-********************************************************/
+
 animate();
 
 
