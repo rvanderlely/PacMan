@@ -687,7 +687,7 @@ const pacman = new Pacman(
   });
 
 
-animate();
+animate();                  //Call the animate function to begin animation loop
 
 
 

@@ -9,14 +9,15 @@
 <title>Pacman Game</title>
 </head>
 <body>
-    <h1>PacWoman</h1>
-    <div ></div>
+
+    <div id = 'start-screen' style ='display: block'  >
+        <img src="images/PacWomanStartScreen.png" width="900" height="600">
+        <br>
+        <button class='button' onclick='startGame()'>Start Game </button>
+    </div>    
     <p id ="scoreboard" style ='display: none'>
         <span >Score: </span><span id="scoreE">0</span>
     </p>
-    <div id = 'start-screen' class = 'screen' style ='display: block' >
-        <button onclick='startGame()'>Start Game </button>
-    </div>
     <div style = "text-align:center;"> 
          <canvas id="canvas" style = 'display: none;'> </canvas>  
          <p id ='gameOver' style = 'display: none;'>Game Over</p>
