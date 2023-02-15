@@ -40,31 +40,10 @@ To clone and run this application, you'll need [Git](https://git-scm.com) and [N
 $ git clone git@github.com:rvanderlely/PacMan.git
 
 # Go into the repository
-$ cd electron-markdownify
+$ cd into the name of the directory on your computer
 
 # Install dependencies
 $ npm install
 
-# Run the app
-
-
-> **Note**
-
-
-
-## Download
-
-
-
-## Credits
-
-
-## Related
-
-
-
-## License
-
-
-
-
+# Run the app 
+using vs code click the "go live link" in the bottom right corner to compile your code. 
