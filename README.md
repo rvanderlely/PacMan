@@ -15,7 +15,7 @@
   <a href="#license">License</a>
 </p>
 
-<p align="center" > ![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif) </p>
+![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif) 
 
 ## Key Features
 * 2 Chasing Ghosts with Basic AI
