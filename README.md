@@ -18,8 +18,11 @@
 ![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif)
 
 ## Key Features
-
-* 
+* 2 Chasing Ghosts with Basic AI
+* Collision detection for Ghosts and Pacman
+* Boundarys completed with images for map
+*Power-Up capablity to give pacman ability to eat "scared ghosts" 
+   
 
 ## How To Use
 
