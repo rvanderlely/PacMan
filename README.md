@@ -16,11 +16,11 @@
 </p>
 
   <p align="center">
-  <img width="460" height="300" src="https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif">
+  <img width="460" height="460" src="https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif">
 </p>
    
    
-![screenshot]() 
+
 
 ## Key Features
 * 2 Chasing Ghosts with Basic AI
