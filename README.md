@@ -14,7 +14,7 @@
   <a href="#related">Related</a> •
   <a href="#license">License</a>
 </p>
-
+<br></br>
 ![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif) 
 
 ## Key Features
@@ -51,30 +51,13 @@ $ npm install
 
 ## Credits
 
-This software uses the following open source packages:
-
-- [Electron](http://electron.atom.io/)
-- [Node.js](https://nodejs.org/)
-- [Marked - a markdown parser](https://github.com/chjj/marked)
-- [showdown](http://showdownjs.github.io/showdown/)
-- [CodeMirror](http://codemirror.net/)
-- Emojis are taken from [here](https://github.com/arvida/emoji-cheat-sheet.com)
-- [highlight.js](https://highlightjs.org/)
 
 ## Related
 
-[markdownify-web](https://github.com/amitmerchant1990/markdownify-web) - Web version of Markdownify
-
-
-
-## You may also like...
 
 
 ## License
 
-
-
----
 
 
 
