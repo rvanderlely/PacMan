@@ -21,7 +21,7 @@
 * 2 Chasing Ghosts with Basic AI
 * Collision detection for Ghosts and Pacman
 * Boundarys completed with images for map
-*Power-Up capablity to give pacman ability to eat "scared ghosts" 
+* Power-Up capablity to give pacman ability to eat "scared ghosts" 
    
 
 ## How To Use
@@ -30,7 +30,7 @@ To clone and run this application, you'll need [Git](https://git-scm.com) and [N
 
 ```bash
 # Clone this repository
-$ git clone https://github.com/amitmerchant1990/electron-markdownify
+$ git clone git@github.com:rvanderlely/PacMan.git
 
 # Go into the repository
 $ cd electron-markdownify
@@ -39,8 +39,7 @@ $ cd electron-markdownify
 $ npm install
 
 # Run the app
-$ npm start
-```
+
 
 > **Note**
 
@@ -48,8 +47,6 @@ $ npm start
 
 ## Download
 
-
-## Emailware
 
 
 ## Credits
