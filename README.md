@@ -14,7 +14,12 @@
   <a href="#related">Related</a> •
   <a href="#license">License</a>
 </p>
-<br></br>
+
+  <p align="center">
+  <img width="460" height="300" src="http://www.fillmurray.com/460/300">
+</p>
+   
+   
 ![screenshot](https://github.com/rvanderlely/PacMan/blob/main/images/pacman.gif) 
 
 ## Key Features
