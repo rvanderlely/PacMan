@@ -6,6 +6,11 @@
 
 <h4 align="center">A basic rendition of the original pacman game. <a href="http://electron.atom.io" target="_blank"></h4>
 
+Live Link: https://rvanderlely.github.io/PacMan/ 
+![image](https://user-images.githubusercontent.com/101234963/218941681-a483b006-0b5f-4abb-90cf-7a00f5d09c6a.png)
+
+
+
 <p align="center">
   <a href="#key-features">Key Features</a> •
   <a href="#how-to-use">How To Use</a> •
