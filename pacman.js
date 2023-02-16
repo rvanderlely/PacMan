@@ -15,7 +15,6 @@ function startGame()
 toggleScreen('canvas',true)
 toggleScreen('scoreboard',true)
 toggleScreen('start-screen',false)
-
 }
 /*----------------------------------------------------------------------------
               endGame Function
