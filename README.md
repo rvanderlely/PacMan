@@ -9,7 +9,7 @@
 
 
 
-Live Link: https://rvanderlely.github.io/PacMan/
+                                           Live Link: https://rvanderlely.github.io/PacMan/
 
 <p align="center">
   <a href="#key-features">Key Features</a> •
